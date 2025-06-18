@@ -16,6 +16,9 @@ public class Login extends javax.swing.JFrame {
         initComponents();
         //setExtendedState(Login.MAXIMIZED_BOTH); // Pantalla completa
         setLocationRelativeTo(null); // Centra la ventana
+        
+        // INICIALIZA TODAS LAS LISTAS QUE SE UTILIZAN EN EL SISTEMA
+        
      
     }
 

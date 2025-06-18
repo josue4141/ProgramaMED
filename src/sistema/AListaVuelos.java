@@ -7,7 +7,6 @@ package sistema;
 import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -16,15 +15,17 @@ import java.awt.event.ActionListener;
  * @author paola
  */
 public class AListaVuelos extends javax.swing.JFrame {
-
-    GestorVuelos gestorVuelos = new GestorVuelos();
+    
+    private final GestorVuelos gestorVuelos = GestorVuelos.getInstancia();
 
     /**
      * Creates new form AListaVuelos
      */
     public AListaVuelos() {
         initComponents();
-        crearVuelosEjemplo();
+        if(gestorVuelos.getVuelos().isEmpty()){
+            crearVuelosEjemplo();
+        }
         actualizarTabla();
         agregarListenerComboBox();
 

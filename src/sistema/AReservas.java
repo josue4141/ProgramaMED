@@ -4,6 +4,11 @@
  */
 package sistema;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -14,11 +19,70 @@ import javax.swing.JPanel;
  */
 public class AReservas extends javax.swing.JFrame {
 
+    private final GestorVuelos gestorVuelos = GestorVuelos.getInstancia();
+    private GestorReservas gestorReservas = GestorReservas.getInstancia();
+
     /**
      * Creates new form AReservas
      */
     public AReservas() {
         initComponents();
+        llenadoComboVuelo();
+    }
+
+    public void llenadoComboVuelo() {
+        List<Vuelo> listaVuelo = gestorVuelos.getVuelos();
+
+        // LLENA EL COMBO CON LA LISTA DE VUELOS
+        listaVuelo.forEach(vuelo -> VuelosComboBox.addItem(vuelo.getDestino()));
+    }
+
+    public void guardarReserva() {
+        Reserva reserva = new Reserva();
+        reserva = obtenerDatosFormulario();
+
+        //  AGREGA A LA LISTA DE RESERVA
+        gestorReservas.agregarReserva(reserva);
+        
+        System.out.println(gestorReservas.getReservas().toString());
+        System.out.println(gestorReservas.getReservas().size());
+
+    }
+
+    public Reserva obtenerDatosFormulario() {
+        // Obtener texto de los campos
+        String nombres = nombresTxt.getText();
+        String apellidos = apellidosTxt.getText();
+        String correo = correoTxt.getText();
+        String idPasaporte = idPasaporteTxt.getText();
+
+        // Obtener valores seleccionados en los JComboBox
+        String claseSeleccionada = (String) clasesComboBox.getSelectedItem();
+        String nacionalidadSeleccionada = (String) nacionalidadComboBox.getSelectedItem();
+        String paisOrigen = (String) paisesOrigenComboBox.getSelectedItem();
+        String paisDestino = (String) paisesDestinoComboBox.getSelectedItem();
+        String vueloSeleccionado = (String) VuelosComboBox.getSelectedItem();
+
+        // Obtener fechas
+        Date date = fechaNacimientoDateChooser.getDate(); // este es java.util.Date
+        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        Date fechaIda = idaDateChooser.getDate();
+        Date fechaVuelta = vueltaDateChooser.getDate();
+
+        // Obtener estado de los checkboxes
+        boolean requiereVisa = siCheckbox.getState();
+        boolean noRequiereVisa = noCheckbox.getState();
+
+        Pasajero pasajero = new Pasajero(nombres, apellidos, idPasaporte, localDate, correo, "7528-9371");
+
+        Reserva.ClaseViaje claseViaje = Reserva.ClaseViaje.valueOf(claseSeleccionada.toUpperCase());
+
+        Vuelo vuelo = gestorVuelos.buscarVuelosPorDestino(vueloSeleccionado);
+
+        Reserva reserva = new Reserva(vuelo, pasajero, paisDestino, Reserva.ClaseViaje.valueOf(claseSeleccionada.toUpperCase()), Reserva.MetodoPago.EFECTIVO);
+
+        return reserva;
     }
 
     /**
@@ -94,26 +158,25 @@ public class AReservas extends javax.swing.JFrame {
         reservarBtn.setBackground(new java.awt.Color(51, 153, 0));
         reservarBtn.setForeground(new java.awt.Color(255, 255, 255));
         reservarBtn.setText("RESERVAR");
+        reservarBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                reservarBtnMouseClicked(evt);
+            }
+        });
         reservarBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 reservarBtnActionPerformed(evt);
             }
         });
 
-        nombresTxt.setBackground(new java.awt.Color(255, 255, 255));
-        nombresTxt.setForeground(new java.awt.Color(0, 0, 0));
         nombresTxt.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         nombres.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        nombres.setForeground(new java.awt.Color(0, 0, 0));
         nombres.setText("Nombres:");
 
-        apellidosTxt.setBackground(new java.awt.Color(255, 255, 255));
-        apellidosTxt.setForeground(new java.awt.Color(0, 0, 0));
         apellidosTxt.setToolTipText("");
         apellidosTxt.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
-        idPasaporteTxt.setBackground(new java.awt.Color(255, 255, 255));
         idPasaporteTxt.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         idPasaporteTxt.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -121,27 +184,21 @@ public class AReservas extends javax.swing.JFrame {
             }
         });
 
-        correoTxt.setBackground(new java.awt.Color(255, 255, 255));
         correoTxt.setBorder(javax.swing.BorderFactory.createEtchedBorder());
 
         apellidos.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        apellidos.setForeground(new java.awt.Color(0, 0, 0));
         apellidos.setText("Apellidos:");
 
         idPasaporte.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        idPasaporte.setForeground(new java.awt.Color(0, 0, 0));
         idPasaporte.setText("ID del Pasaporte:");
 
         correo.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        correo.setForeground(new java.awt.Color(0, 0, 0));
         correo.setText("Correo Electrónico:");
 
         fechaNacimiento.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        fechaNacimiento.setForeground(new java.awt.Color(0, 0, 0));
         fechaNacimiento.setText("Fecha de nacimiento:");
 
         visa.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        visa.setForeground(new java.awt.Color(0, 0, 0));
         visa.setText("¿Tiene Visa?");
 
         siCheckbox.setLabel("si");
@@ -149,61 +206,39 @@ public class AReservas extends javax.swing.JFrame {
         noCheckbox.setLabel("no");
 
         nacionalidad.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        nacionalidad.setForeground(new java.awt.Color(0, 0, 0));
         nacionalidad.setText("Nacionalidad:");
 
-        nacionalidadComboBox.setBackground(new java.awt.Color(255, 255, 255));
-        nacionalidadComboBox.setForeground(new java.awt.Color(0, 0, 0));
         nacionalidadComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "argentino/a", "boliviano/a", "brasileño/a", "chileno/a", "colombiano/a", "costarricense", "cubano/a", "ecuatoriano/a", "salvadoreño/a", "guatemalteco/a", "hondureño/a", "mexicano/a", "nicaragüense", "panameño/a", "paraguayo/a", "peruano/a", "dominicano/a", "uruguayo/a", "venezolano/a" }));
         nacionalidadComboBox.setBorder(null);
 
         fechaNacimientoDateChooser.setBackground(new java.awt.Color(255, 255, 255));
-        fechaNacimientoDateChooser.setForeground(new java.awt.Color(0, 0, 0));
 
         paisOrigen.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        paisOrigen.setForeground(new java.awt.Color(0, 0, 0));
         paisOrigen.setText("País de origen:");
 
         paisDestino.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        paisDestino.setForeground(new java.awt.Color(0, 0, 0));
         paisDestino.setText("País de destino:");
 
-        paisesOrigenComboBox.setBackground(new java.awt.Color(255, 255, 255));
-        paisesOrigenComboBox.setForeground(new java.awt.Color(0, 0, 0));
         paisesOrigenComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Argentina", "Bolivia", "Brasil", "Chile", "Colombia", "Costa Rica", "Cuba", "Ecuador", "El Salvador", "Guatemala", "Honduras", "México", "Nicaragua", "Panamá", "Paraguay", "Perú", "República Dominicana\t", "Uruguay\t", "Venezuela" }));
 
-        paisesDestinoComboBox.setBackground(new java.awt.Color(255, 255, 255));
-        paisesDestinoComboBox.setForeground(new java.awt.Color(0, 0, 0));
         paisesDestinoComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Argentina", "Bolivia", "Brasil", "Chile", "Colombia", "Costa Rica", "Cuba", "Ecuador", "El Salvador", "Guatemala", "Honduras", "México", "Nicaragua", "Panamá", "Paraguay", "Perú", "República Dominicana\t", "Uruguay\t", "Venezuela" }));
 
         ida.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        ida.setForeground(new java.awt.Color(0, 0, 0));
         ida.setText("Ida:");
 
         idaDateChooser.setBackground(new java.awt.Color(255, 255, 255));
-        idaDateChooser.setForeground(new java.awt.Color(0, 0, 0));
 
         vueltaDateChooser.setBackground(new java.awt.Color(255, 255, 255));
-        vueltaDateChooser.setForeground(new java.awt.Color(0, 0, 0));
 
-        VuelosComboBox.setBackground(new java.awt.Color(255, 255, 255));
-        VuelosComboBox.setForeground(new java.awt.Color(0, 0, 0));
-        VuelosComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        clasesComboBox.setBackground(new java.awt.Color(255, 255, 255));
-        clasesComboBox.setForeground(new java.awt.Color(0, 0, 0));
         clasesComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Alta", "Económica" }));
 
         clases.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        clases.setForeground(new java.awt.Color(0, 0, 0));
         clases.setText("Clase:");
 
         vuelta.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        vuelta.setForeground(new java.awt.Color(0, 0, 0));
         vuelta.setText("Vuelta:");
 
         vuelos.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        vuelos.setForeground(new java.awt.Color(0, 0, 0));
         vuelos.setText("Vuelo:");
 
         javax.swing.GroupLayout fondoLayout = new javax.swing.GroupLayout(fondo);
@@ -310,7 +345,11 @@ public class AReservas extends javax.swing.JFrame {
                                     .addComponent(siCheckbox, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(noCheckbox, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(40, 40, 40)))
-                        .addGap(52, 52, 52))
+                        .addGap(52, 52, 52)
+                        .addComponent(clases)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(clasesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(24, 24, 24))
                     .addGroup(fondoLayout.createSequentialGroup()
                         .addGroup(fondoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(nacionalidad)
@@ -339,14 +378,9 @@ public class AReservas extends javax.swing.JFrame {
                                 .addComponent(ida)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(idaDateChooser, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)))
-                .addGroup(fondoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(fondoLayout.createSequentialGroup()
-                        .addComponent(clases)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(clasesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(reservarBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(24, 24, 24))
+                        .addGap(18, 18, 18)
+                        .addComponent(reservarBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 57, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(31, Short.MAX_VALUE))))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -367,22 +401,15 @@ public class AReservas extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_idPasaporteTxtActionPerformed
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     private void reservarBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reservarBtnActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_reservarBtnActionPerformed
+
+    private void reservarBtnMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_reservarBtnMouseClicked
+        guardarReserva();
+
+    }//GEN-LAST:event_reservarBtnMouseClicked
 
     /**
      * @param args the command line arguments

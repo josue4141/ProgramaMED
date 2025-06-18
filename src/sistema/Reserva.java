@@ -3,16 +3,14 @@ package sistema;
 //Se importa la clase UUID para generar identificadores unicos para cada reserva
 import java.util.UUID;
 
-
 public class Reserva {
 
     // Identificador unico que se genera automáticamente para cada reserva
-    private final String idReserva;
-    private final Vuelo vuelo;
-    private final Pasajero pasajero;  
-    private final String asiento;  
-    private final ClaseViaje claseViaje; 
-   
+    private String idReserva;
+    private Vuelo vuelo;
+    private Pasajero pasajero;
+    private String asiento;
+    private ClaseViaje claseViaje;
 
     // Define las clases de viaje disponibles
     public enum ClaseViaje {
@@ -41,13 +39,16 @@ public class Reserva {
             throw new IllegalArgumentException("Elige un metodo de pago para completar la reserva");
         }
 
-         //Genera y asigna un ID unico para la reserva
+        //Genera y asigna un ID unico para la reserva
         this.idReserva = UUID.randomUUID().toString();
         this.vuelo = vuelo;
         this.pasajero = pasajero;
         this.asiento = asiento;
         this.claseViaje = claseViaje;
-       
+
+    }
+
+    public Reserva() {
     }
 
     // Getters para acceder a los atributos
@@ -71,5 +72,4 @@ public class Reserva {
         return claseViaje;
     }
 
-  
 }

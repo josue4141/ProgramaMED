@@ -4,7 +4,10 @@
  */
 package sistema;
 
+import java.util.List;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -12,11 +15,16 @@ import javax.swing.JPanel;
  */
 public class AListaReservas extends javax.swing.JFrame {
 
+    private final GestorVuelos gestorVuelos = GestorVuelos.getInstancia();
+    private GestorReservas gestorReservas = GestorReservas.getInstancia();
+
     /**
      * Creates new form AListaReservas
      */
     public AListaReservas() {
         initComponents();
+        llenadoComboVuelo();
+        llenadoTable();
     }
 
     /**
@@ -105,35 +113,27 @@ public class AListaReservas extends javax.swing.JFrame {
         fondo.add(actualizarBtn, new org.netbeans.lib.awtextra.AbsoluteConstraints(710, 400, -1, 40));
 
         correoActual.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        correoActual.setForeground(new java.awt.Color(0, 0, 0));
         correoActual.setText("Correo Electrónico:");
         fondo.add(correoActual, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, 140, -1));
 
-        correoActualTxt.setBackground(new java.awt.Color(255, 255, 255));
-        correoActualTxt.setForeground(new java.awt.Color(0, 0, 0));
         correoActualTxt.setBorder(javax.swing.BorderFactory.createEtchedBorder());
         fondo.add(correoActualTxt, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 110, 200, 36));
 
         claseActual.setBackground(new java.awt.Color(255, 255, 255));
         claseActual.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        claseActual.setForeground(new java.awt.Color(0, 0, 0));
         claseActual.setText("Clase:");
         fondo.add(claseActual, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 170, -1, -1));
 
-        claseActualComboBox.setBackground(new java.awt.Color(255, 255, 255));
-        claseActualComboBox.setForeground(new java.awt.Color(0, 0, 0));
         claseActualComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Alta", "Económica", " " }));
         fondo.add(claseActualComboBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 200, 200, 36));
 
         idaActual.setBackground(new java.awt.Color(255, 255, 255));
         idaActual.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        idaActual.setForeground(new java.awt.Color(0, 0, 0));
         idaActual.setText("Ida:");
         fondo.add(idaActual, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 80, -1, -1));
 
         vueltaActual.setBackground(new java.awt.Color(255, 255, 255));
         vueltaActual.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        vueltaActual.setForeground(new java.awt.Color(0, 0, 0));
         vueltaActual.setText("Vuelta:");
         fondo.add(vueltaActual, new org.netbeans.lib.awtextra.AbsoluteConstraints(580, 80, -1, -1));
         fondo.add(idaDateChooser, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 110, 200, 36));
@@ -141,15 +141,13 @@ public class AListaReservas extends javax.swing.JFrame {
 
         vuelos.setBackground(new java.awt.Color(255, 255, 255));
         vuelos.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        vuelos.setForeground(new java.awt.Color(0, 0, 0));
         vuelos.setText("Vuelos Disponibles:");
         fondo.add(vuelos, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 170, -1, -1));
 
-        vuelosActualesComboBox.setBackground(new java.awt.Color(255, 255, 255));
         vuelosActualesComboBox.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        vuelosActualesComboBox.setForeground(new java.awt.Color(0, 0, 0));
-        vuelosActualesComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        vuelosActualesComboBox.setName("cmbVuelo"); // NOI18N
         fondo.add(vuelosActualesComboBox, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 200, 200, 36));
+        vuelosActualesComboBox.getAccessibleContext().setAccessibleName("");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -173,6 +171,42 @@ public class AListaReservas extends javax.swing.JFrame {
      */
     public JPanel getFondo() {
         return fondo;
+    }
+
+    public void llenadoComboVuelo() {
+        List<Vuelo> listaVuelo = gestorVuelos.getVuelos();
+
+        // LLENA EL COMBO CON LA LISTA DE VUELOS
+        listaVuelo.forEach(vuelo -> vuelosActualesComboBox.addItem(vuelo.getDestino()));
+    }
+
+    public void llenadoTable() {
+        // Definir las columnas que se mostrarán en la tabla
+        String[] columnas = {"ID Reserva", "Nombre", "Correo", "Vuelo", "Asiento", "Clase"};
+
+        // Crear el modelo de tabla con las columnas definidas
+        DefaultTableModel modelo = new DefaultTableModel(columnas, 0);
+
+        // Obtener la lista de reservas
+        List<Reserva> reservas = gestorReservas.getReservas();
+
+        // Llenar la tabla con los datos de cada reserva
+        for (Reserva reserva : reservas) {
+            String id = reserva.getIdReserva();
+            String nombre = reserva.getPasajero().getNombre() + " " + reserva.getPasajero().getApellido();
+            String correo = reserva.getPasajero().getEmail();
+            String vuelo = reserva.getVuelo().getDestino(); // O podés usar un método más descriptivo
+            String asiento = reserva.getAsiento();
+            String clase = reserva.getClaseViaje().toString();
+            
+
+            // Agregar la fila al modelo
+            Object[] fila = {id, nombre, correo, vuelo, asiento, clase};
+            modelo.addRow(fila);
+        }
+
+        // Establecer el modelo en la tabla
+        JtablaReservas.setModel(modelo);
     }
 
     public static void main(String args[]) {
